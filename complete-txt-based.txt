@@ -1,0 +1,58 @@
+setfont /usr/share/kbd/consolefonts/ter-c20b.psf.gz 
+
+ip link
+
+timedatectl set-ntp true 
+
+--- partition here ---- 
+
+--- mount disk here ---
+
+pacstrap /mnt base linux linux-firmware neovim git 
+
+genfstab -U /mnt >> /mnt/etc/fstab
+
+arch-chroot /mnt 
+
+ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime 
+
+hwclock --systohc
+
+vim /etc/locale.gen # edit correct locale 
+
+locale-gen
+
+vim /etc/local # set locale here 
+
+vim /etc/hostname
+
+vim /etc/hosts 
+
+mkinitcpio -P 
+
+pacman -S grub base-devel linux-headers network-manager mtools dialog 
+
+grub-install --target=i386-pc /dev/sda 
+
+grub-mkconfig -o /boot/grub/grub.cfg
+
+systemctl enable NetworkManager 
+
+useradd -m -G wheel <user>
+
+EDITOR=nvim visudo # uncomment wheel grp 
+
+passwd <user>
+
+passwd root 
+
+pacman -S xf86-video-intel 
+
+pacman -S xorg 
+
+yay -S ly 
+
+<post install> 
+
+
+

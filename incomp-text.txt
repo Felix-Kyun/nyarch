@@ -1,0 +1,119 @@
+ip a 
+
+timedatectl set-ntp true 
+
+pacman -Sy
+
+lsblk 
+
+mkfs.btrfs /dev/sda 
+
+mount /dev/sda /mnt 
+
+cd /mnt
+
+btrfs subvolume create @
+btrfs subvolume create @home 
+
+cd
+umount /mnt 
+
+mount -o noatime,space_cache=v2,compress=zstd,ssd,discard=async,subvol=@ /dev/sda /mnt 
+mkdir /home
+same for /home 
+
+pacstrap /mnt base linux linux-firmware neovim git intel-ucode 
+
+genfstab -U /mnt >> /mnt/etc/fstab 
+
+arch-chroot /mnt 
+
+--- configure system here, check once from his script ---
+
+ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime 
+
+hwclock --systohc
+
+sudo reflector -c India -a 12 --sort rate --save /etc/pacman.d/mirrorlist 
+systemctl enable reflector.service
+
+vim /etc/locale.gen # edit correct locale 
+
+locale-gen
+
+echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+
+echo "nyarch" >> /etc/hostname
+
+echo "127.0.0.1 localhost" >> /etc/hosts
+echo "::1       localhost" >> /etc/hosts
+echo "127.0.1.1 nyarch.localdomain nyarch" >> /etc/hosts
+
+pacman -S grub base-devel linux-headers networkmanager network-manager-applet mtools dialog reflector xdg-user-dirs xdg-utils inetutils bluez bluez-utils bash-completion openssh rsync alsa-utils pipewire pipewire-alsa pipewire-pulse pipewire-jack
+
+grub-install --target=i386-pc /dev/sda 
+
+grub-mkconfig -o /boot/grub/grub.cfg
+
+systemctl enable NetworkManager
+systemctl enable bluetooth
+
+useradd -m -G wheel <user>
+
+EDITOR=nvim visudo # uncomment wheel grp 
+
+passwd <user>
+
+passwd root 
+
+pacman -S xf86-video-intel xorg 
+
+
+--- end configure ---
+# before reboot
+nvim /etc/mkinitcpio.conf 
+ |-- add 'btrfs' in MODULES=()
+
+mkinitcpio -P linux 
+
+exit
+
+umount -R /mnt 
+
+reboot 
+
+# after reboot
+
+
+setfont ter-132n
+
+ip a 
+
+sudo pacman -Sy 
+
+git clone https://aur.archlinux.org/ly
+cd ly;makepkg -si
+sudo systemctl enable ly
+
+setup awesome here 
+
+--- time shift setup ---
+
+on gui 
+
+# install aur helper 
+yay or paru 
+
+yay -S timeshift \
+    timeshift-autosnap 
+
+btrfs > select ur disk [/dev/sda] > set time > exclude @home > finish 
+
+>> create 
+
+--- zram ---
+
+yay -S zramd 
+
+sudo systemctl enable --now zramd.service 
+
