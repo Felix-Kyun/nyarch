@@ -1,3 +1,7 @@
+setfont /usr/share/kbd/consolefonts/ter-c20b.psf.gz 
+or 
+setfont ter-128n
+
 ip a 
 
 timedatectl set-ntp true 
@@ -19,10 +23,10 @@ cd
 umount /mnt 
 
 mount -o noatime,space_cache=v2,compress=zstd,ssd,discard=async,subvol=@ /dev/sda /mnt 
-mkdir /home
+mkdir /mnt/home
 same for /home 
 
-pacstrap /mnt base linux linux-firmware neovim git intel-ucode 
+pacstrap /mnt base linux linux-firmware neovim git intel-ucode btrfs-progs
 
 genfstab -U /mnt >> /mnt/etc/fstab 
 
@@ -34,6 +38,7 @@ ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
 
 hwclock --systohc
 
+edit pacman.conf to enable parallel downloads 
 sudo reflector -c India -a 12 --sort rate --save /etc/pacman.d/mirrorlist 
 systemctl enable reflector.service
 
@@ -49,7 +54,7 @@ echo "127.0.0.1 localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 nyarch.localdomain nyarch" >> /etc/hosts
 
-pacman -S grub base-devel linux-headers networkmanager network-manager-applet mtools dialog reflector xdg-user-dirs xdg-utils inetutils bluez bluez-utils bash-completion openssh rsync alsa-utils pipewire pipewire-alsa pipewire-pulse pipewire-jack
+pacman -S --needed grub base-devel linux-headers networkmanager network-manager-applet mtools dialog reflector xdg-user-dirs xdg-utils inetutils bluez bluez-utils bash-completion openssh rsync alsa-utils pipewire pipewire-alsa pipewire-pulse pipewire-jack
 
 grub-install --target=i386-pc /dev/sda 
 
